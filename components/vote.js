@@ -12,7 +12,7 @@ class Vote {
         this.author = null;
         this.info = null;
         this.expire = null;
-        this.choices = ['Test', 'Test_2'];
+        this.choices = [];
         this.voteState = [];
 
         this.discord = {
