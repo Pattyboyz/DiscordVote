@@ -14,6 +14,7 @@ class Vote {
         this.expire = null;
         this.choices = [];
         this.voteState = [];
+        this.votedUsers = [];
 
         this.discord = {
             bot: null,
@@ -35,7 +36,7 @@ class Vote {
 
         let choices = [];
         for (let i in this.choices) {
-            this.voteState.push({ choice: this.choices[i], count: 0, icon: icons[i], voters: [] });
+            this.voteState.push({ choice: this.choices[i], count: 0, icon: icons[i] });
             choices.push(`${icons[i]} ${this.choices[i]} - 0 vote(s)`);
         }
 
@@ -90,34 +91,34 @@ class Vote {
         this.choices = [];
     }
 
-    setVoteCount(icon, count) {
-        return new Promise(resolve => {
-            let score = this.voteState.find(choice => choice.icon === icon);
-            if (!score) { return resolve({ ok: false, message: 'Failed to find somedata.' }); }
+    addVoteCount(userId, icon) {
+        let isUserHasVoted = this.votedUsers.find(voterId => voterId == userId);
+        if (isUserHasVoted) { return; }
 
-            score.count = (count - 1);
+        let score = this.voteState.find(choice => choice.icon === icon);
+        if (!score) { return; }
 
-            let choices = [];
-            for (let i in this.choices) {
-                let score = this.voteState.find(choice => choice.choice === this.choices[i]);
+        score.count++;
+        this.votedUsers.push(userId);
 
-                this.voteState.push({ choice: this.choices[i], count: 0, icon: icons[i] });
-                choices.push(`${icons[i]} ${this.choices[i]} - ${score.count} vote(s)`);
-            }
+        let choices = [];
+        for (let i in this.choices) {
+            let score = this.voteState.find(choice => choice.choice === this.choices[i]);
 
-            this.discord.voteMessage.edit({
-                embeds: [{
-                    author: { name: `${this.author.username}'s vote` },
-                    fields: [
-                        { name: `Vote Info`, value: this.info, inline: true },
-                        { name: `Expire In`, value: this.expire, inline: true },
-                        { name: `Choices`, value: choices.join('\n') }
-                    ],
-                    color: 'BLUE'
-                }]
-            });
+            this.voteState.push({ choice: this.choices[i], count: 0, icon: icons[i] });
+            choices.push(`${icons[i]} ${this.choices[i]} - ${score.count} vote(s)`);
+        }
 
-            resolve({ ok: true });
+        this.discord.voteMessage.edit({
+            embeds: [{
+                author: { name: `${this.author.username}'s vote` },
+                fields: [
+                    { name: `Vote Info`, value: this.info, inline: true },
+                    { name: `Expire In`, value: this.expire, inline: true },
+                    { name: `Choices`, value: choices.join('\n') }
+                ],
+                color: 'BLUE'
+            }]
         });
     }
 }
