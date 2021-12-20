@@ -16,7 +16,6 @@ const prefix = '!';
 
 // Cache
 const Votes = [];
-const votedUsers = [];
 
 // Components
 const Vote = require('./components/vote');
@@ -96,10 +95,7 @@ bot.on('messageReactionAdd', async (reaction, user) => {
     let targetVote = Object.values(Votes).find(vote => vote.discord.voteMessage.id === reaction.message.id);
     if (!targetVote) { return; }
 
-    let result = await targetVote.setVoteCount(reaction.emoji.name, reaction.count);
-    if (!result.ok) { return message.reply(result.message); }
-
-    //TODO - User must vote just 1 choice.
+    targetVote.addVoteCount(user.id, reaction.emoji.name);
 });
 
 Emit.Register('vote-expired', voteId => {
